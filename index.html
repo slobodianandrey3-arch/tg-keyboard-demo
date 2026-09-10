@@ -12,9 +12,12 @@
   body{ margin:0; height:100%; background:var(--bg); color:var(--text);
         font:16px/1.35 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
         overflow:hidden; overscroll-behavior:none; -webkit-text-size-adjust:100%; }
-  /* Корень прибит к рамке WebView. Рамку двигает сам Telegram вместе с клавиатурой,
-     поэтому ничего не считаем в JS и не используем --tg-viewport-*height. */
-  #app{ position:fixed; inset:0; display:flex; flex-direction:column; background:var(--bg); }
+  /* Высота корня берётся из --tg-viewport-height. На iOS это самый ранний сигнал:
+     Telegram присылает конечную высоту в момент старта анимации клавиатуры,
+     а саму рамку WebView меняет с опозданием ~0.5 с (на открытии).
+     visualViewport на закрытии вообще залипает на старом значении. */
+  #app{ position:fixed; top:0; left:0; right:0; height:var(--tg-viewport-height, 100%);
+        display:flex; flex-direction:column; background:var(--bg); }
   #hud{ font:11px/1.3 ui-monospace,Menlo,Consolas,monospace; color:var(--muted);
         padding:6px 12px; padding-top:calc(6px + env(safe-area-inset-top)); white-space:pre; }
   #log{ flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
