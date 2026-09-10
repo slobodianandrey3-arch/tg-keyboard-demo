@@ -93,7 +93,7 @@
 
   var hud = document.getElementById('hud'), log = document.getElementById('log'),
       bar = document.getElementById('bar'), inp = document.getElementById('inp');
-  var n = 0;
+  var n = 0, fsErr = '';
   function draw(){
     var vv = window.visualViewport;
     hud.textContent = 'inner ' + window.innerHeight
@@ -103,7 +103,7 @@
       + '  events ' + n
       + (tg && tg.safeAreaInset ? '\nsafe t' + tg.safeAreaInset.top + ' b' + tg.safeAreaInset.bottom
          + '  content t' + (tg.contentSafeAreaInset ? tg.contentSafeAreaInset.top : '-')
-         + '  fs ' + (tg.isFullscreen ? 1 : 0) : '');
+         + '  fs ' + (tg.isFullscreen ? 1 : 0) + (fsErr ? ' FAIL:' + fsErr : '') : '');
   }
   window.addEventListener('resize', draw);
   if (window.visualViewport) {
@@ -115,6 +115,8 @@
     tg.onEvent('safeAreaChanged', draw);
     tg.onEvent('contentSafeAreaChanged', draw);
     tg.onEvent('fullscreenChanged', draw);
+    /* Если клиент отказал в фуллскрине, причина появится в строке сверху: UNSUPPORTED или ALREADY_FULLSCREEN */
+    tg.onEvent('fullscreenFailed', function(e){ fsErr = (e && e.error) || 'unknown'; draw(); });
   }
   draw();
 
