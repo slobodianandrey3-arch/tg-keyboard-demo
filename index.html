@@ -19,8 +19,11 @@
      Анимировать высоту не надо: сигнал приходит с опозданием, анимация только добавит лаг. */
   #app{ position:fixed; top:0; left:0; right:0; height:var(--tg-viewport-height, 100%);
         display:flex; flex-direction:column; background:var(--bg); }
+  /* Фуллскрин: сверху статус-бар (safe-area) плюс плавающие кнопки Telegram (content-safe-area). */
   #hud{ font:11px/1.3 ui-monospace,Menlo,Consolas,monospace; color:var(--muted);
-        padding:6px 12px; padding-top:calc(6px + env(safe-area-inset-top)); white-space:pre; }
+        padding:6px 12px; white-space:pre;
+        padding-top:calc(6px + max(env(safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px))
+                         + var(--tg-content-safe-area-inset-top, 0px)); }
   #log{ flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
         padding:8px 12px; display:flex; flex-direction:column; gap:8px; overscroll-behavior:contain; }
   .msg{ background:var(--panel); padding:10px 12px; border-radius:16px; max-width:80%;
@@ -84,6 +87,8 @@
     try { tg.setHeaderColor(BG); } catch(e){}
     try { tg.setBottomBarColor(BG); } catch(e){}
     try { tg.disableVerticalSwipes(); } catch(e){}
+    /* Полноэкранный режим, Bot API 8.0+. Контент уходит под статус-бар, отступы берём из safe-area. */
+    try { if (tg.isVersionAtLeast('8.0')) tg.requestFullscreen(); } catch(e){}
   }
 
   var hud = document.getElementById('hud'), log = document.getElementById('log'),
@@ -95,14 +100,23 @@
       + '  visual ' + (vv ? Math.round(vv.height) : '-')
       + '  tg ' + (tg ? Math.round(tg.viewportHeight) : '-')
       + '  stable ' + (tg ? Math.round(tg.viewportStableHeight) : '-')
-      + '  events ' + n;
+      + '  events ' + n
+      + (tg && tg.safeAreaInset ? '
+safe t' + tg.safeAreaInset.top + ' b' + tg.safeAreaInset.bottom
+         + '  content t' + (tg.contentSafeAreaInset ? tg.contentSafeAreaInset.top : '-')
+         + '  fs ' + (tg.isFullscreen ? 1 : 0) : '');
   }
   window.addEventListener('resize', draw);
   if (window.visualViewport) {
     visualViewport.addEventListener('resize', draw);
     visualViewport.addEventListener('scroll', draw);
   }
-  if (tg) tg.onEvent('viewportChanged', function(){ n++; draw(); });
+  if (tg) {
+    tg.onEvent('viewportChanged', function(){ n++; draw(); });
+    tg.onEvent('safeAreaChanged', draw);
+    tg.onEvent('contentSafeAreaChanged', draw);
+    tg.onEvent('fullscreenChanged', draw);
+  }
   draw();
 
   /* iOS иногда прокручивает сам документ, чтобы показать поле ввода. Возвращаем на место. */
