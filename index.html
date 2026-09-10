@@ -17,7 +17,11 @@
      а саму рамку WebView меняет с опозданием ~0.5 с (на открытии).
      visualViewport на закрытии вообще залипает на старом значении. */
   #app{ position:fixed; top:0; left:0; right:0; height:var(--tg-viewport-height, 100%);
-        display:flex; flex-direction:column; background:var(--bg); }
+        display:flex; flex-direction:column; background:var(--bg);
+        /* Плавность: высота едет 250 мс по кривой, близкой к анимации клавиатуры iOS.
+           Telegram присылает конечную высоту в начале анимации, поэтому поле ввода
+           едет вместе с клавиатурой, а не прыгает. */
+        transition: height 250ms cubic-bezier(.17,.59,.4,.77); }
   #hud{ font:11px/1.3 ui-monospace,Menlo,Consolas,monospace; color:var(--muted);
         padding:6px 12px; padding-top:calc(6px + env(safe-area-inset-top)); white-space:pre; }
   #log{ flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
