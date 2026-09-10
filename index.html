@@ -101,8 +101,7 @@
       + '  tg ' + (tg ? Math.round(tg.viewportHeight) : '-')
       + '  stable ' + (tg ? Math.round(tg.viewportStableHeight) : '-')
       + '  events ' + n
-      + (tg && tg.safeAreaInset ? '
-safe t' + tg.safeAreaInset.top + ' b' + tg.safeAreaInset.bottom
+      + (tg && tg.safeAreaInset ? '\nsafe t' + tg.safeAreaInset.top + ' b' + tg.safeAreaInset.bottom
          + '  content t' + (tg.contentSafeAreaInset ? tg.contentSafeAreaInset.top : '-')
          + '  fs ' + (tg.isFullscreen ? 1 : 0) : '');
   }
